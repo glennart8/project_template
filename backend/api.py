@@ -15,7 +15,7 @@ from backend.modules.registry import register_modules
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Startup/shutdown-händelser."""
     setup_logging()
     await create_db_and_tables()
