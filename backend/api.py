@@ -13,6 +13,7 @@ from database import create_db_and_tables
 from logging_config import setup_logging
 from modules.registry import register_modules
 
+
 # lifespan är en async context manager som FastAPI kör som ett skal runt hela serverns livstid:
 # startup-logik före yield, server kör under yield, shutdown-logik efter yield.
 @asynccontextmanager
