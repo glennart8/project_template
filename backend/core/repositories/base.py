@@ -1,6 +1,6 @@
 """Generisk bas-repository med CRUD-operationer."""
 
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -28,7 +28,9 @@ class BaseRepository(Generic[T]):
         await self.session.refresh(obj)
         return obj
 
-    async def update(self, obj: T) -> T:
+    async def update(self, obj: T, data: dict[str, Any]) -> T:
+        """Partiell uppdatering via SQLModels sqlmodel_update."""
+        obj.sqlmodel_update(data)
         self.session.add(obj)
         await self.session.commit()
         await self.session.refresh(obj)

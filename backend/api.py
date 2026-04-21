@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.config import settings
+from backend.config import APP_VERSION, settings
 from backend.core.exceptions import register_exception_handlers
 from backend.core.routers.system import router as system_router
 from backend.database import create_db_and_tables
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(
     title=settings.APP_NAME,
-    version="0.1.0",
+    version=APP_VERSION,
     lifespan=lifespan,
 )
 

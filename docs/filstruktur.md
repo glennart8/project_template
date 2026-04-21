@@ -15,6 +15,7 @@ project_root/
 │   ├── database.py                 # Engine, sessionshantering
 │   ├── logging_config.py           # Structlog-konfiguration
 │   ├── seed.py                     # Testdata / initial seed
+│   ├── assets/                     # Statiska filer (mallar, bilder, ikoner)
 │   │
 │   ├── core/                       # Delad generisk logik (ej domänspecifik)
 │   │   ├── __init__.py
@@ -44,7 +45,6 @@ project_root/
 │       └── modules/                # Tester per modul
 │
 ├── docs/                           # Dokumentation
-├── assets/                         # Bilder, ikoner etc.
 ├── docker-compose.yml              # Docker Compose för hela stacken
 ├── .gitignore
 ├── .claudeignore

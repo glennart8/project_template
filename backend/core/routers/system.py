@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from backend.config import settings
+from backend.config import APP_VERSION, settings
 
 router = APIRouter(tags=["system"])
 
@@ -16,4 +16,4 @@ async def health() -> dict[str, str]:
 @router.get("/version")
 async def version() -> dict[str, str]:
     """Returnerar applikationens namn och version."""
-    return {"name": settings.APP_NAME, "version": "0.1.0"}
+    return {"name": settings.APP_NAME, "version": APP_VERSION}

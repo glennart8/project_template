@@ -1,6 +1,13 @@
 """Centraliserad konfiguration via pydantic-settings."""
 
+from importlib.metadata import PackageNotFoundError, version
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+try:
+    APP_VERSION = version("backend")
+except PackageNotFoundError:
+    APP_VERSION = "0.0.0"
 
 
 class Settings(BaseSettings):
