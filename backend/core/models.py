@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlmodel import SQLModel, Field
+from sqlmodel import Field, SQLModel
 
 
 class TimestampMixin(SQLModel):

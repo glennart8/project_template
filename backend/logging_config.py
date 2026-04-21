@@ -1,6 +1,7 @@
 """Strukturerad JSON-loggning med structlog."""
 
 import logging
+
 import structlog
 
 

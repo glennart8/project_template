@@ -1,6 +1,7 @@
 """Testdata / initial seed för utveckling."""
 
 import asyncio
+
 from backend.database import create_db_and_tables
 
 
