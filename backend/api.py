@@ -30,6 +30,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS-middleware för att tillåta frontend-appar att anropa API:et. 
+# I produktion bör CORS_ORIGINS begränsas till de faktiska domänerna där frontend-apparna hostas.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,

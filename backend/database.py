@@ -8,8 +8,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from config import settings
 
+# Async engine så att databasanrop inte blockerar FastAPI:s event loop —
+# flera requests kan vänta på I/O samtidigt i stället för seriellt.
 engine = create_async_engine(settings.DATABASE_URL, echo=settings.DEBUG)
 
+# Async session factory som skapar AsyncSession-objekt när vi behöver en session.
 async_session_factory = async_sessionmaker(
     engine,
     class_=AsyncSession,
