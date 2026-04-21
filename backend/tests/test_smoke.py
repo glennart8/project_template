@@ -2,7 +2,7 @@
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from backend.api import app
+from api import app
 
 
 async def test_session_fixture_ger_async_session(session: AsyncSession) -> None:

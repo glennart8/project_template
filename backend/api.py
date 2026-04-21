@@ -6,12 +6,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.config import APP_VERSION, settings
-from backend.core.exceptions import register_exception_handlers
-from backend.core.routers.system import router as system_router
-from backend.database import create_db_and_tables
-from backend.logging_config import setup_logging
-from backend.modules.registry import register_modules
+from config import APP_VERSION, settings
+from core.exceptions import register_exception_handlers
+from core.routers.system import router as system_router
+from database import create_db_and_tables
+from logging_config import setup_logging
+from modules.registry import register_modules
 
 
 @asynccontextmanager

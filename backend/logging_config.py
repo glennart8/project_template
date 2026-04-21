@@ -4,7 +4,7 @@ import logging
 
 import structlog
 
-from backend.config import settings
+from config import settings
 
 
 def setup_logging() -> None:

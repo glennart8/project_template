@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from backend.config import APP_VERSION, settings
+from config import APP_VERSION, settings
 
 router = APIRouter(tags=["system"])
 

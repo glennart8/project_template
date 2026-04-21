@@ -20,7 +20,7 @@ npm install
 
 ```bash
 # Backend (port 8000)
-cd backend && uv run uvicorn backend.api:app --reload
+cd backend && uv run uvicorn api:app --reload
 
 # Frontend (port 5173)
 cd frontend && npm run dev
