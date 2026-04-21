@@ -1,0 +1,6 @@
+.env
+*.db
+*.joblib
+*.pkl
+node_modules/
+.venv/
