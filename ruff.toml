@@ -2,8 +2,10 @@ line-length = 100
 target-version = "py312"
 
 [lint]
-select = ["E", "F", "I", "W"]
+# E,F,W = fel och stil. I = importordning. UP = modern Python.
+# DTZ = tider utan tidszon, använd clock.py.
+select = ["E", "F", "I", "W", "UP", "DTZ"]
 ignore = ["E501"]
 
 [lint.isort]
-known-first-party = ["config", "core", "database", "modules", "api", "seed"]
+known-first-party = ["api", "clock", "config", "core", "database", "modules", "seed"]
