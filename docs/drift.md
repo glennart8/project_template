@@ -26,10 +26,16 @@ På en Linuxserver med Docker:
 
 ```bash
 git clone <repo> && cd <repo>
-echo "POSTGRES_PASSWORD=<långt lösenord, bara bokstäver och siffror>" > .env
+cat > .env <<'EOF'
+POSTGRES_PASSWORD=<långt lösenord, bara bokstäver och siffror>
+ADMIN_GROUP=<ObjectId för Entra-gruppen som ska ha rollen admin>
+EOF
 chmod 600 .env
 docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+Utan `ADMIN_GROUP` blir ingen admin. Har projektet fler roller i `config.py`
+behöver var och en sin rad här.
 
 Spara lösenordet i kommunens lösenordsvalv. `.env` finns bara på servern.
 
@@ -49,6 +55,8 @@ Backend kör nya migrationer själv vid start.
 - [ ] Enterprise-appen i Entra skickar headerna `x-control-header`,
       `x-control-displayname-header` och `x-control-group-header`.
 - [ ] Användare och grupper är tilldelade appen i Entra («Assignment required»).
+- [ ] `.env` på servern har grupp-id för varje roll (`ADMIN_GROUP` …). Prova att en
+      admin får göra det bara admin får.
 - [ ] Backup av databasen (`pg_dump`) och av uppladdade filer, till en annan maskin.
       **Med Postgres sköter projektet backupen själv** — drift säkerhetskopierar
       inte en container på appservern. Med MS SQL sköter drift den, se
