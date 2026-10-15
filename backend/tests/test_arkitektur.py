@@ -9,8 +9,7 @@ def _repository_files() -> list[Path]:
     return [
         path
         for path in BACKEND.rglob("*.py")
-        if ".venv" not in path.parts
-        and ("repositories" in path.parts or path.name == "repository.py")
+        if ".venv" not in path.parts and "repositories" in path.parts
     ]
 
 

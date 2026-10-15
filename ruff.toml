@@ -12,5 +12,5 @@ ignore = ["E501"]
 [lint.isort]
 known-first-party = [
     "api", "auth", "clock", "config", "database", "dependencies", "errors",
-    "models", "repositories", "routers", "schemas", "seed", "services",
+    "models", "repositories", "routers", "schemas", "services",
 ]

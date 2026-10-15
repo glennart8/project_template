@@ -160,6 +160,12 @@ def is_database_up(session: Session) -> bool:
 `backend/routers/system.py`:
 
 ```python
+from fastapi import APIRouter, Response
+
+from database import is_database_up
+from dependencies import CurrentUserDep, SessionDep
+
+
 @router.get("/health")
 def health(session: SessionDep, response: Response) -> dict[str, str]:
     if not is_database_up(session):
