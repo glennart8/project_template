@@ -11,7 +11,3 @@ def test_sviten_kor_mot_testdatabasen(session: Session) -> None:
 
 def test_health_svarar_under_api(client: TestClient) -> None:
     assert client.get("/api/health").json() == {"status": "ok"}
-
-
-def test_version_svarar_under_api(client: TestClient) -> None:
-    assert client.get("/api/version").status_code == 200

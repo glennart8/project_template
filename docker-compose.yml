@@ -1,7 +1,9 @@
 # Utveckling. För drift, se docker-compose.prod.yml.
 #
-#   docker compose up -d db        bara databasen; backend och frontend körs lokalt
-#   docker compose up -d --build   hela stacken på http://localhost:8080
+#   docker compose up -d --build   hela systemet på http://localhost:8080,
+#                                  direkt efter kloning — ingen .env behövs
+#   docker compose up -d db        bara databasen, när du kör backend och
+#                                  frontend själv med omladdning
 
 services:
   db:
@@ -32,6 +34,8 @@ services:
     environment:
       # Inuti Docker heter databasen `db`, inte localhost.
       DATABASE_URL: postgresql+psycopg://app:app@db:5432/app
+      # Ingen Application Proxy lokalt: en fast testanvändare.
+      AUTH_MODE: mock
     depends_on:
       db:
         condition: service_healthy

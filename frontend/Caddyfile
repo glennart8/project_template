@@ -1,9 +1,6 @@
-# Enda vägen in till systemet.
-#
-# SITE_ADDRESS är :80 som standard — vanlig http, rätt bakom Entra Application
-# Proxy. Med ett värdnamn (t.ex. minapp.udn.ds) sköter Caddy https själv;
-# lägg då till `tls internal` eller kommunens certifikat.
-{$SITE_ADDRESS::80} {
+# Enda vägen in till systemet. Vanlig http, rätt bakom Entra Application Proxy.
+# https ända fram till servern: se docs/extra.md.
+:80 {
 	encode
 
 	handle /api/* {

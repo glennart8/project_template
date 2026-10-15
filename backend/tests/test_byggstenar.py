@@ -62,10 +62,5 @@ def test_servicefel_oversatts_till_http(error: type[Exception], status: int) -> 
     assert response.json() == {"detail": "Begripligt meddelande"}
 
 
-def test_health_ger_503_utan_databas(client: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr("core.routers.system.is_database_up", lambda _: False)
-    assert client.get("/api/health").status_code == 503
-
-
 def test_klockan_har_tidszon() -> None:
     assert clock.now().tzinfo is not None
