@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     APP_NAME: str = "MyApp"
-    DATABASE_URL: str = "sqlite:///./app.db"
+    DATABASE_URL: str = "postgresql+psycopg://app:app@localhost:5432/app"
     DEBUG: bool = False
 
 
