@@ -56,10 +56,14 @@ backend/
 
 ## Var en regel hör hemma
 
-* **Invariant** — kan aldrig vara sann, i någon version: i databasen (constraint,
-  främmande nyckel).
-* **Policy** — gäller nu, ändras genom beslut: i konfiguration, inte som constraint.
-* **Regel som behöver sammanhang** (tidigare värde, flera tabeller): i servicen.
+Det avgörs av hur fast regeln är:
+
+* En regel som **aldrig får brytas**, oavsett beslut, läggs i databasen (constraint,
+  främmande nyckel). Exempel: ett ärende måste gälla en medarbetare.
+* En regel som **kan ändras genom beslut** läggs i konfiguration, aldrig som
+  constraint. Exempel: hur länge handlingar sparas.
+* En regel som **måste jämföras med annan data** (tidigare värde, flera tabeller)
+  läggs i servicen. Exempel: ett avslutat ärende kan inte dokumenteras.
 
 Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är auktoritet.
 
