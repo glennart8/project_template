@@ -9,8 +9,8 @@ from alembic import context
 from sqlalchemy import create_engine, pool
 from sqlmodel import SQLModel
 
-# Importera varje models-modul här, annars ser autogenerate inte tabellerna.
-import modules.notes.models  # noqa: F401
+# Tabellerna måste vara importerade, annars ser autogenerate dem inte.
+import models  # noqa: F401
 from config import settings
 
 config = context.config

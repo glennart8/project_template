@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlmodel import Session
 
-from core.auth import CurrentUser, get_current_user
+from auth import CurrentUser, get_current_user
 from database import get_session
 
 SessionDep = Annotated[Session, Depends(get_session)]

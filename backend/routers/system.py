@@ -2,8 +2,8 @@
 
 from fastapi import APIRouter
 
-from core.auth import CurrentUser
-from core.dependencies import CurrentUserDep
+from auth import CurrentUser
+from dependencies import CurrentUserDep
 
 router = APIRouter(tags=["system"])
 

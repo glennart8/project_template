@@ -1,14 +1,14 @@
-"""Reglerna. Kastar Pythons inbyggda fel; core/exceptions.py gör dem till HTTP."""
+"""Reglerna. Kastar Pythons inbyggda fel; errors.py gör dem till HTTP."""
 
 import logging
 import uuid
 
 from sqlmodel import Session
 
-from core.auth import CurrentUser
-from modules.notes import repository
-from modules.notes.models import Note
-from modules.notes.schemas import NoteCreate, NotePublic
+from auth import CurrentUser
+from models import Note
+from repositories import notes as repository
+from schemas import NoteCreate, NotePublic
 
 logger = logging.getLogger(__name__)
 

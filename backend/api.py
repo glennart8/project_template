@@ -5,9 +5,9 @@ import logging
 from fastapi import FastAPI
 
 from config import settings
-from core.exceptions import register_exception_handlers
-from core.routers.system import router as system_router
-from modules.notes.router import router as notes_router
+from errors import register_exception_handlers
+from routers.notes import router as notes_router
+from routers.system import router as system_router
 
 # Utan detta släpps bara varningar och fel igenom — logger.info() i koden
 # syns ingenstans. Loggarna skrivs till konsolen, där Docker samlar dem.

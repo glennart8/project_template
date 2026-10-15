@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 import clock
 from config import Settings, settings
-from core.exceptions import register_exception_handlers
+from errors import register_exception_handlers
 
 
 def test_mock_inloggning_stoppas_i_produktion() -> None:

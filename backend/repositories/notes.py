@@ -4,7 +4,7 @@ import uuid
 
 from sqlmodel import Session, select
 
-from modules.notes.models import Note
+from models import Note
 
 
 def add(session: Session, note: Note) -> Note:
