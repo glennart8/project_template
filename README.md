@@ -4,7 +4,18 @@ Byt titeln mot projektets namn och skriv två meningar om vad systemet gör.
 
 Mallen följer teamets Golden Path: FastAPI, SQLModel, Postgres, React och Caddy,
 med inloggning via Entra Application Proxy. Reglerna står i [CLAUDE.md](CLAUDE.md),
-driften i [docs/drift.md](docs/drift.md).
+driften i [docs/drift.md](docs/drift.md). Det som går att lägga till när behovet
+finns står i [docs/extra.md](docs/extra.md).
+
+## Prova direkt
+
+Kräver bara Docker.
+
+```bash
+docker compose up -d --build      # http://localhost:8080
+```
+
+Du är inloggad som en testanvändare.
 
 ## Från mall till drift
 
@@ -14,12 +25,13 @@ driften i [docs/drift.md](docs/drift.md).
 3. **Bygg din första modul** efter exemplet i `backend/modules/notes/`. Ta sedan bort
    exemplet: katalogen, raden i `api.py`, importen i `migrations/env.py`, dess
    migration och `tests/test_notes.py`.
-4. **Pusha.** CI kör lint, tester mot Postgres, frontendbygget och driftens images.
+4. **Kör testerna och pusha.**
 5. **Driftsätt** enligt [docs/drift.md](docs/drift.md).
 
-## Starta lokalt
+## Utveckla lokalt
 
-Kräver Docker, [uv](https://docs.astral.sh/uv/) och Node 22.
+Med omladdning när du sparar. Kräver Docker, [uv](https://docs.astral.sh/uv/) och
+Node 22.
 
 ```bash
 cp .env.example .env              # mock-inloggning, lokal databas
@@ -34,9 +46,6 @@ cd ../frontend
 npm ci
 npm run dev                                   # http://localhost:5173
 ```
-
-Hela stacken i Docker, som i drift: `docker compose up -d --build` →
-http://localhost:8080.
 
 ## Test och lint
 

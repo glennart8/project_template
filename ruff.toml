@@ -1,5 +1,7 @@
 line-length = 100
 target-version = "py312"
+# Alembic genererar migrationerna. De läses igenom, men lintas inte.
+extend-exclude = ["backend/migrations/versions"]
 
 [lint]
 # E,F,W = fel och stil. I = importordning. UP = modern Python.
@@ -9,7 +11,3 @@ ignore = ["E501"]
 
 [lint.isort]
 known-first-party = ["api", "clock", "config", "core", "database", "modules", "seed"]
-
-[lint.per-file-ignores]
-# Alembics mall skriver "Revises: " med blanksteg när det inte finns någon föregångare.
-"backend/migrations/versions/*" = ["W291"]

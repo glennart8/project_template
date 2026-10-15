@@ -18,7 +18,7 @@ Server: Caddy (port 80)     ← enda öppna porten
 | Image | Ritningen en container startas från, byggd från en `Dockerfile`. |
 | Docker Compose | En fil som beskriver alla containrar och hur de hänger ihop. |
 | Reverse proxy | Den enda dörren in. Tar emot alla anrop och skickar dem vidare. Här: Caddy. |
-| Healthcheck | `/api/health` — svarar `ok` om appen och databasen lever, annars 503. |
+| Healthcheck | `/api/health` — svarar `ok` om appen lever. |
 
 ## Första driftsättningen
 
@@ -60,7 +60,8 @@ Backend kör nya migrationer själv vid start.
 - Backend och databas har ingen öppen port.
 - Containrarna körs inte som root.
 - API-dokumentationen är avstängd, och testinloggning stoppas vid start.
-- `--proxy-headers`: användarens IP-adress loggas, inte proxyns.
+
+Övervakning, CI och https ända fram till servern: se [extra.md](extra.md).
 
 ## Felsökning
 

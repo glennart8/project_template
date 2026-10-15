@@ -4,17 +4,11 @@ Ordning: miljövariabel → .env i projektroten → standardvärdet nedan.
 Ogiltiga värden stoppar uppstarten i stället för att märkas i drift.
 """
 
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-try:
-    APP_VERSION = version("backend")
-except PackageNotFoundError:
-    APP_VERSION = "0.0.0"
 
 
 class Settings(BaseSettings):

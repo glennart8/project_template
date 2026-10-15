@@ -18,10 +18,5 @@ USER app
 ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
-
 # Migrationerna körs vid varje start; Alembic hoppar över dem som redan körts.
-# --proxy-headers: användarens IP-adress i stället för proxyns. Att lita på
-# alla avsändare (*) går bara för att backend aldrig publiceras utanför Docker.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn api:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn api:app --host 0.0.0.0 --port 8000"]
