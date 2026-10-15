@@ -16,8 +16,15 @@ function App() {
 
   const reload = () => listNotes().then(setNotes)
 
+  // Körs en gång vid start. Anropar API:et direkt, inte reload(): en funktion i
+  // komponenten inne i effekten ger ESLint-varningen exhaustive-deps.
   useEffect(() => {
-    run(() => getMe().then(setUser).then(reload))
+    run(() =>
+      getMe()
+        .then(setUser)
+        .then(() => listNotes())
+        .then(setNotes),
+    )
   }, [])
 
   const add = (event: FormEvent) => {
