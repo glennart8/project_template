@@ -28,7 +28,7 @@ backend/
   api.py            app och routrar
   config.py         inställningar
   database.py       session (SessionDep)
-  auth.py           inloggning och roller (CurrentUserDep, require_role)
+  auth.py           inloggning och roller (CurrentUserDep)
   errors.py         fel → HTTP
   clock.py          tid
   models.py         alla tabeller
@@ -43,7 +43,7 @@ backend/
 
 * **Anropen går bara nedåt:** `router` → `service` → `repository` → `models`.
   * `router` tar emot anropet och lämnar över. Ingen regel, ingen SQL.
-  * `service` bär reglerna och **äger transaktionen** — det är bara servicen som
+  * `service` bär reglerna, **prövar behörigheten** och **äger transaktionen** — det är bara servicen som
     anropar `session.commit()`. Bygg svaret före commit.
   * `repository` gör frågorna. Inga regler, aldrig commit (låst med test).
 * **Fel:** servicen kastar `LookupError` (404), `PermissionError` (403) eller
@@ -86,8 +86,9 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 * **Roller:** Entra-gruppernas ObjectId översätts till roller i `auth.py`.
   Grupp-id:na står i `config.py` (`ADMIN_GROUP`), aldrig i koden — de skiljer
   sig mellan test och drift.
-* En endpoint som kräver en roll får `dependencies=[Depends(require_role("admin"))]`
-  och svarar 403 utan den. Se `routers/notes.py`.
+* **Behörigheten prövas i servicen**, inte i routern: servicen får användaren och
+  kastar `PermissionError` (403) om rollen saknas. Se `delete_note` i
+  `services/notes.py`.
 * Ett **enskilt objekt** som användaren inte får se ger 404, inte 403 — 403
   avslöjar att det finns.
 
