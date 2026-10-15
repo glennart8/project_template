@@ -36,6 +36,10 @@ docker compose up -d --build      # http://localhost:8080
 
 Du är inloggad som en testanvändare.
 
+Kör du redan ett annat projekt från mallen krockar portarna 5432 och 8080. Stoppa
+det andra (`docker compose stop` där), eller välj andra portar:
+`DB_PORT=5433 WEB_PORT=8081 docker compose up -d --build`.
+
 ## Från mall till drift
 
 1. **Skapa repot** från mallen (*Use this template*), i organisationens
