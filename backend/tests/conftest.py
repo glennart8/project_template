@@ -56,6 +56,16 @@ def engine() -> Generator[Engine]:
     engine.dispose()
 
 
+@pytest.fixture(autouse=True)
+def _login_by_headers(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Testerna loggar in med headers, oavsett vad utvecklarens .env säger.
+
+    Användaren i gruppen "admin-grupp" har rollen admin.
+    """
+    monkeypatch.setattr(settings, "AUTH_MODE", "app_proxy")
+    monkeypatch.setattr(settings, "ADMIN_GROUP", "admin-grupp")
+
+
 @pytest.fixture
 def session(engine: Engine) -> Generator[Session]:
     """En session vars ändringar rullas tillbaka efter testet, även efter commit()."""

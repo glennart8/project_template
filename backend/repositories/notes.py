@@ -19,3 +19,8 @@ def get(session: Session, note_id: uuid.UUID) -> Note | None:
 
 def list_all(session: Session) -> list[Note]:
     return list(session.exec(select(Note).order_by(Note.created_at.desc())))
+
+
+def delete(session: Session, note: Note) -> None:
+    session.delete(note)
+    session.flush()

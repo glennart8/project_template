@@ -35,3 +35,14 @@ def get_note(session: Session, note_id: uuid.UUID) -> NotePublic:
 
 def list_notes(session: Session) -> list[NotePublic]:
     return [NotePublic.model_validate(note) for note in repository.list_all(session)]
+
+
+def delete_note(session: Session, note_id: uuid.UUID) -> None:
+    # Vem som får ta bort avgörs i routern (require_role); här finns regeln
+    # att anteckningen måste finnas.
+    note = repository.get(session, note_id)
+    if note is None:
+        raise LookupError("Anteckningen finns inte.")
+    repository.delete(session, note)
+    session.commit()
+    logger.info("Anteckning %s borttagen", note_id)

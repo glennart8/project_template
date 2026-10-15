@@ -84,8 +84,13 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 
 * Identiteten kommer från Entra Application Proxy som headers, se `auth.py`.
 * Användaren hämtas alltid med `CurrentUserDep`, **aldrig ur en parameter**.
-* Vad användaren får göra avgör appen utifrån gruppernas ObjectId.
-* Den som inte får se något får 404, inte 403 — 403 avslöjar att det finns.
+* **Roller:** Entra-gruppernas ObjectId översätts till roller i `auth.py`.
+  Grupp-id:na står i `config.py` (`ADMIN_GROUP`), aldrig i koden — de skiljer
+  sig mellan test och drift.
+* En endpoint som kräver en roll får `dependencies=[Depends(require_role("admin"))]`
+  och svarar 403 utan den. Se `routers/notes.py`.
+* Ett **enskilt objekt** som användaren inte får se ger 404, inte 403 — 403
+  avslöjar att det finns.
 
 # Tester
 
