@@ -2,9 +2,9 @@
 
 from collections.abc import Generator
 
-from sqlalchemy import text
+from sqlalchemy import literal
 from sqlalchemy.exc import SQLAlchemyError
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, create_engine, select
 
 from config import settings
 
@@ -20,7 +20,7 @@ def get_session() -> Generator[Session]:
 def is_database_up(session: Session) -> bool:
     """För hälsokontrollen: svarar databasen?"""
     try:
-        session.execute(text("SELECT 1"))
+        session.exec(select(literal(1))).one()
     except SQLAlchemyError:
         return False
     return True
