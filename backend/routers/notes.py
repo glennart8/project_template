@@ -4,8 +4,8 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from auth import get_current_user, require_role
-from dependencies import CurrentUserDep, SessionDep
+from auth import CurrentUserDep, get_current_user, require_role
+from database import SessionDep
 from schemas import NoteCreate, NotePublic
 from services import notes as service
 
