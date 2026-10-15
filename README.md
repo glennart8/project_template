@@ -36,19 +36,35 @@ docker compose up -d --build      # http://localhost:8080
 
 Du är inloggad som en testanvändare.
 
+Kör du redan ett annat projekt från mallen krockar portarna 5432 och 8080. Stoppa
+det andra (`docker compose stop` där), eller välj andra portar:
+`DB_PORT=5433 WEB_PORT=8081 docker compose up -d --build`.
+
 ## Från mall till drift
 
-1. **Skapa repot** från mallen, i organisationens GitHub-konto. Byt `APP_NAME`,
-   titeln i `frontend/index.html` och den här README:n.
+1. **Skapa repot** från mallen (*Use this template*), i organisationens
+   GitHub-konto. Byt namnet: `APP_NAME` i `backend/config.py` och `.env.example`,
+   `<title>` i `frontend/index.html`, rubriken i `frontend/src/App.tsx` och den här
+   README:n.
 2. **Starta lokalt** (se nedan) och kontrollera att testerna är gröna.
 3. **Bygg ditt första område** efter exemplet *notes*. I backend:
    `routers/notes.py`, `services/notes.py`, `repositories/notes.py`, `Note` i
    `models.py`, schemana i `schemas.py` och `tests/test_notes.py`. I frontend:
-   typerna och anropen i `src/api.ts` och sidan i `src/App.tsx`. Ta sedan bort
-   exemplet: de filerna och klasserna, raden i `api.py` och migrationen i
-   `migrations/versions/`.
-4. **Kör testerna och pusha.**
-5. **Driftsätt** enligt [docs/drift.md](docs/drift.md).
+   typerna och anropen i `src/api.ts` och sidan i `src/App.tsx`.
+   ⚠ **Skapa ingen migration ännu** — den skulle bygga vidare på exemplets.
+4. **Ta bort exemplet:** filerna och klasserna ovan, raden i `api.py`, notes-delarna
+   i `src/api.ts` och exemplets migration i `migrations/versions/`. Nollställ
+   sedan databasen och skapa din första migration:
+
+   ```bash
+   docker compose down -v            # tömmer den lokala databasen
+   docker compose up -d db
+   cd backend
+   uv run python -m alembic revision --autogenerate -m "lade_till_x"
+   ```
+
+5. **Kör testerna och pusha.**
+6. **Driftsätt** enligt [docs/drift.md](docs/drift.md).
 
 ## Utveckla lokalt
 

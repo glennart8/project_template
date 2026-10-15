@@ -87,8 +87,8 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
   Grupp-id:na står i `config.py` (`ADMIN_GROUP`), aldrig i koden — de skiljer
   sig mellan test och drift.
 * **Behörigheten prövas i servicen**, inte i routern: servicen får användaren och
-  kastar `PermissionError` (403) om rollen saknas. Se `delete_note` i
-  `services/notes.py`.
+  kastar `PermissionError` (403) om rollen saknas:
+  `if "admin" not in user.roles: raise PermissionError("…")`.
 * Ett **enskilt objekt** som användaren inte får se ger 404, inte 403 — 403
   avslöjar att det finns.
 
@@ -102,10 +102,14 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 
 # Säkerhet
 
-* Rör aldrig `.env`.
+* Läs eller ändra aldrig `.env` — den kan innehålla riktiga hemligheter. Utvecklaren
+  skapar sin egen från `.env.example`; testerna och `docker compose up` fungerar
+  utan den.
 * Inga personuppgifter i tekniska loggar — logga id, inte innehåll. Logga med
   `logger = logging.getLogger(__name__)` och parametrar, inte f-strängar:
   `logger.info("Anteckning %s skapad", note_id)`.
+* Uvicorns åtkomstlogg är avstängd i `Dockerfile`, eftersom adressen kan bära
+  personuppgifter (`?q=<namn>`). Slå inte på den utan att lösa det.
 * Ingen produktionsdata i test eller utveckling.
 * Invänta alltid manuellt godkännande innan systemkommandon eller filändringar.
 
