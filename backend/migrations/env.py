@@ -14,7 +14,9 @@ import modules.notes.models  # noqa: F401
 from config import settings
 
 config = context.config
-if config.config_file_name is not None:
+# Testriggen kör migrationerna i samma process som appen och stänger av detta:
+# loggkonfigurationen i alembic.ini skulle annars tysta appens loggar.
+if config.config_file_name is not None and config.attributes.get("configure_logger", True):
     fileConfig(config.config_file_name)
 
 url = config.get_main_option("sqlalchemy.url") or settings.DATABASE_URL

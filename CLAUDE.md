@@ -85,7 +85,9 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 # Säkerhet
 
 * Rör aldrig `.env`.
-* Inga personuppgifter i tekniska loggar — logga id, inte innehåll.
+* Inga personuppgifter i tekniska loggar — logga id, inte innehåll. Logga med
+  `logger = logging.getLogger(__name__)` och parametrar, inte f-strängar:
+  `logger.info("Anteckning %s skapad", note_id)`.
 * Ingen produktionsdata i test eller utveckling.
 * Invänta alltid manuellt godkännande innan systemkommandon eller filändringar.
 

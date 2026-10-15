@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: Literal["development", "production"] = "development"
     DATABASE_URL: str = "postgresql+psycopg://app:app@localhost:5432/app"
     DEBUG: bool = False
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     # app_proxy: identiteten kommer i headers från Entra Application Proxy.
     # mock: en fast användare, för utveckling utan proxy.

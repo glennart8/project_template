@@ -6,6 +6,14 @@ fungera, men var och en kräver att någon förstår den och tar ansvar för den
 
 Ordningen är den rekommenderade.
 
+1. [CI — tester vid varje push](#1-ci--tester-vid-varje-push)
+2. [Loggar som överlever en driftsättning](#2-loggar-som-överlever-en-driftsättning)
+3. [Hälsokontroll och övervakning med larm](#3-hälsokontroll-och-övervakning-med-larm)
+4. [Rätt IP-adress i loggarna](#4-rätt-ip-adress-i-loggarna)
+5. [https ända fram till servern](#5-https-ända-fram-till-servern)
+6. [Mätvärden](#6-mätvärden)
+7. [Central loggsamling](#7-central-loggsamling)
+
 ---
 
 ## 1. CI — tester vid varje push
@@ -90,15 +98,47 @@ körningens sammanfattning när en version blir föråldrad.
 
 ---
 
-## 2. Hälsokontroll med databas
+## 2. Loggar som överlever en driftsättning
 
-**Ger:** `/api/health` svarar 503 när databasen inte svarar, och Docker visar
-`healthy` eller `unhealthy` i `docker compose ps`.
+**Ger:** loggarna finns kvar efter `docker compose up --build`. Utan det försvinner
+de varje gång en container byggs om — alltså vid varje uppdatering — och det går
+inte att felsöka något som hände före den senaste.
 
-**När:** när något övervakar systemet och kan larma. Utan övervakning läser
-ingen värdet.
+**När:** så fort systemet är i drift och någon kan behöva felsöka i efterhand.
 
-**Gör så här:**
+**Gör så här:** låt Docker skriva till serverns journal i stället för till
+containerns egen fil. I `docker-compose.prod.yml`, byt blocket överst:
+
+```yaml
+x-logging: &logging
+  # Serverns journal: överlever att containern byggs om, och journalen
+  # roterar själv.
+  driver: journald
+```
+
+Läs loggarna som förut med `docker compose logs`, eller direkt ur journalen:
+
+```bash
+journalctl CONTAINER_NAME=<projekt>-backend-1 --since "1 hour ago"
+```
+
+**Ansvar:** hur länge journalen sparas styrs av `SystemMaxUse` i
+`/etc/systemd/journald.conf` på servern. Bestäm det tillsammans med den som
+ansvarar för servern.
+
+---
+
+## 3. Hälsokontroll och övervakning med larm
+
+**Ger:** ett larm när systemet ligger nere, innan användarna hör av sig.
+
+**När:** när systemet används på riktigt.
+
+Två delar: appen ska kunna svara på om den mår bra, och något utanför ska fråga
+den regelbundet.
+
+**a) Låt `/api/health` kontrollera databasen.** Idag svarar den `ok` så fort
+appen lever, även om databasen är nere.
 
 `backend/database.py`:
 
@@ -128,16 +168,32 @@ def health(session: SessionDep, response: Response) -> dict[str, str]:
     return {"status": "ok"}
 ```
 
-`backend/Dockerfile`, före `CMD`:
+`backend/Dockerfile`, före `CMD`, så att `docker compose ps` visar
+`healthy` eller `unhealthy`:
 
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=5s \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
 ```
 
+**b) Låt något fråga och larma.** Enklast är
+[Uptime Kuma](https://github.com/louislam/uptime-kuma): en container med
+webbgränssnitt som anropar `/api/health` varje minut och larmar via e-post eller
+Teams.
+
+```bash
+docker run -d --restart=always -p 3001:3001 -v uptime-kuma:/app/data \
+  --name uptime-kuma louislam/uptime-kuma:1
+```
+
+⚠ Kör den på **en annan server** än systemet den övervakar. Går servern ner,
+ska larmet inte gå ner med den.
+
+**Ansvar:** någon tar emot larmen och vet vad som ska göras.
+
 ---
 
-## 3. Rätt IP-adress i loggarna
+## 4. Rätt IP-adress i loggarna
 
 **Ger:** backend ser användarens IP-adress i stället för Caddys.
 
@@ -155,7 +211,7 @@ aldrig har en öppen port utanför Docker — bara Caddy når den.
 
 ---
 
-## 4. https ända fram till servern
+## 5. https ända fram till servern
 
 **Ger:** krypterad trafik även mellan App Proxy-connectorn och servern.
 
@@ -175,3 +231,42 @@ minapp.udn.ds {
 Öppna port 443 i `docker-compose.prod.yml`. Med `tls internal` måste
 connectorn lita på Caddys rotcertifikat; med kommunens certifikat pekar
 `tls` på certifikatfilerna i stället.
+
+---
+
+## 6. Mätvärden
+
+**Ger:** diagram över antal anrop, svarstider och fel över tid. Svarar på frågor
+som ett larm inte gör: blir systemet långsammare? Vilken endpoint felar mest?
+
+**När:** när det finns frågor om prestanda eller användning som loggarna inte
+besvarar.
+
+**Gör så här:** appen exponerar `/api/metrics` med biblioteket
+`prometheus-client`. Prometheus hämtar värdena regelbundet och Grafana visar
+dem. Konstregistret har en fungerande uppsättning att utgå från: `metrics.py`
+och tjänsterna `prometheus` och `grafana` i dess `docker-compose.yml`.
+Bakgrund: `DOKUMENTATION/prometheus.md` och `DOKUMENTATION/grafana.md`.
+
+⚠ `/api/metrics` ska inte nås utifrån. Lägg den bakom Caddy med en regel som
+bara släpper in Prometheus, eller låt Prometheus hämta direkt från backend
+inne i Docker-nätverket.
+
+**Ansvar:** någon underhåller Prometheus, Grafana och dashboards.
+
+---
+
+## 7. Central loggsamling
+
+**Ger:** alla systems loggar sökbara på ett ställe, med tid och filter, i
+stället för `docker compose logs` på varje server.
+
+**När:** när ni har flera system i drift och felsöker över dem.
+
+**Gör så här:** Alloy samlar containrarnas loggar och skickar dem till Loki,
+som Grafana söker i. Konstregistret har en fungerande uppsättning: tjänsterna
+`alloy` och `loki` i dess `docker-compose.yml`. Bakgrund:
+`DOKUMENTATION/loki.md`.
+
+**Ansvar:** någon äger Loki-servern, lagringstiden och åtkomsten. Loggarna får
+inte innehålla personuppgifter — det gäller dubbelt när de samlas på ett ställe.
