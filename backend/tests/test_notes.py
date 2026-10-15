@@ -1,4 +1,4 @@
-"""Exempelmodulens tester — mönstret för en moduls tester."""
+"""Exemplets tester — mönstret för ett områdes tester."""
 
 import uuid
 

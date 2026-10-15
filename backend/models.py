@@ -1,4 +1,4 @@
-"""Tabellen. Schemat i databasen ägs av Alembic — se migrations/versions/."""
+"""Tabellerna. Schemat i databasen ägs av Alembic — se migrations/versions/."""
 
 import uuid
 from datetime import datetime

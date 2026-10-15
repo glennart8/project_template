@@ -17,7 +17,7 @@ STATUS_BY_ERROR: dict[type[Exception], int] = {
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Registrera ett handler per feltyp i STATUS_BY_ERROR."""
+    """En hanterare per feltyp i STATUS_BY_ERROR."""
     for error, status in STATUS_BY_ERROR.items():
         app.add_exception_handler(error, _handler(status))
 

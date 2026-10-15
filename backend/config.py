@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "MyApp"
     ENVIRONMENT: Literal["development", "production"] = "development"
     DATABASE_URL: str = "postgresql+psycopg://app:app@localhost:5432/app"
-    DEBUG: bool = False
+    SQL_ECHO: bool = False  # skriv ut varje SQL-fråga, vid felsökning
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     # app_proxy: identiteten kommer i headers från Entra Application Proxy.
