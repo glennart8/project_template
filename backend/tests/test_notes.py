@@ -47,6 +47,11 @@ def test_tom_anteckning_ger_422(client: TestClient) -> None:
     assert response.json() == {"detail": "Anteckningen får inte vara tom."}
 
 
+def test_for_lang_anteckning_ger_422_inte_500(client: TestClient) -> None:
+    response = client.post("/api/notes", json={"text": "a" * 2001}, headers=USER)
+    assert response.status_code == 422
+
+
 def test_okand_anteckning_ger_404(client: TestClient) -> None:
     assert client.get(f"/api/notes/{uuid.uuid4()}", headers=USER).status_code == 404
 

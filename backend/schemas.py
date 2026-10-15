@@ -4,11 +4,13 @@ inte syns i API:et av misstag."""
 import uuid
 from datetime import datetime
 
-from sqlmodel import SQLModel
+from sqlmodel import Field, SQLModel
 
 
 class NoteCreate(SQLModel):
-    text: str
+    # Indatans form kontrolleras här och ger 422. Samma gräns som kolumnen i
+    # models.py — tabellen kontrollerar inte själv, utan databasen ger 500.
+    text: str = Field(max_length=2000)
 
 
 class NotePublic(SQLModel):
