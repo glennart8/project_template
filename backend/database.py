@@ -2,6 +2,8 @@
 
 from collections.abc import Generator
 
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlmodel import Session, create_engine
 
 from config import settings
@@ -13,3 +15,12 @@ def get_session() -> Generator[Session]:
     """En session per request. Servicen committar, inte repositoryt."""
     with Session(engine) as session:
         yield session
+
+
+def is_database_up(session: Session) -> bool:
+    """För hälsokontrollen: svarar databasen?"""
+    try:
+        session.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        return False
+    return True

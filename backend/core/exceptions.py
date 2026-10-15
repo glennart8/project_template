@@ -1,38 +1,29 @@
-"""Gemensamma undantag och FastAPI exception handlers."""
+"""Översätter servicelagrets fel till HTTP, på ett ställe.
+
+Servicen kastar Pythons inbyggda fel med ett meddelande som kan visas för
+användaren. Routrarna behöver då ingen try/except.
+"""
+
+from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-
-class AppException(Exception):
-    """Basundantag för applikationen."""
-
-    def __init__(self, message: str, status_code: int = 400) -> None:
-        self.message = message
-        self.status_code = status_code
-        super().__init__(message)
-
-
-class NotFoundException(AppException):
-    """Resursen hittades inte."""
-
-    def __init__(self, message: str = "Resursen hittades inte") -> None:
-        super().__init__(message=message, status_code=404)
-
-
-class ConflictException(AppException):
-    """Konflikt — resursen finns redan eller tillståndet är ogiltigt."""
-
-    def __init__(self, message: str = "Konflikt") -> None:
-        super().__init__(message=message, status_code=409)
+STATUS_BY_ERROR: dict[type[Exception], int] = {
+    LookupError: 404,  # finns inte, eller får inte ses — 404 avslöjar inget
+    PermissionError: 403,
+    ValueError: 422,  # bryter mot en regel
+}
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Registrera globala exception handlers på FastAPI-appen."""
+    """Registrera ett handler per feltyp i STATUS_BY_ERROR."""
+    for error, status in STATUS_BY_ERROR.items():
+        app.add_exception_handler(error, _handler(status))
 
-    @app.exception_handler(AppException)
-    async def app_exception_handler(_: Request, exc: AppException) -> JSONResponse:
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.message},
-        )
+
+def _handler(status: int) -> Callable[[Request, Exception], Awaitable[JSONResponse]]:
+    async def handle(_: Request, exc: Exception) -> JSONResponse:
+        return JSONResponse(status_code=status, content={"detail": str(exc)})
+
+    return handle
