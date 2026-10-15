@@ -49,9 +49,10 @@ def list_notes(session: Session) -> list[NotePublic]:
     return [_to_public(note) for note in repository.list_all(session)]
 
 
-def delete_note(session: Session, note_id: uuid.UUID) -> None:
-    # Vem som får ta bort avgörs i routern (require_role); här finns regeln
-    # att anteckningen måste finnas.
+def delete_note(session: Session, user: CurrentUser, note_id: uuid.UUID) -> None:
+    if "admin" not in user.roles:
+        raise PermissionError("Bara admin får ta bort anteckningar.")
+
     note = repository.get(session, note_id)
     if note is None:
         raise LookupError("Anteckningen finns inte.")

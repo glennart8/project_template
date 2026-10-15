@@ -4,7 +4,6 @@
 allt utom proxyn — annars kan vem som helst skriva dem själv.
 """
 
-from collections.abc import Callable
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request
@@ -59,18 +58,5 @@ def get_current_user(request: Request) -> CurrentUser:
 
 
 # Användaren hämtas alltid ur inloggningen, aldrig ur en parameter i anropet.
+# Vad användaren får göra prövar servicen, utifrån user.roles.
 CurrentUserDep = Annotated[CurrentUser, Depends(get_current_user)]
-
-
-def require_role(role: str) -> Callable[[CurrentUser], CurrentUser]:
-    """Beroende för en endpoint som kräver en roll: 403 utan den.
-
-    @router.delete(..., dependencies=[Depends(require_role("admin"))])
-    """
-
-    def check(user: CurrentUserDep) -> CurrentUser:
-        if role not in user.roles:
-            raise HTTPException(status_code=403, detail="Du saknar behörighet för detta.")
-        return user
-
-    return check
