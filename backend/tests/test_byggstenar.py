@@ -19,24 +19,25 @@ def test_app_proxy_tillats_i_produktion() -> None:
     assert Settings(ENVIRONMENT="production", AUTH_MODE="app_proxy")
 
 
-def test_app_proxy_utan_header_ger_401(client: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr(settings, "AUTH_MODE", "app_proxy")
+def test_app_proxy_utan_header_ger_401(client: TestClient) -> None:
     assert client.get("/api/me").status_code == 401
 
 
-def test_app_proxy_laser_anvandare_och_grupper(client: TestClient, monkeypatch) -> None:
-    monkeypatch.setattr(settings, "AUTH_MODE", "app_proxy")
+def test_app_proxy_oversatter_grupper_till_roller(client: TestClient) -> None:
     response = client.get(
         "/api/me",
         headers={
             "x-control-header": "HEPI02",
             "x-control-displayname-header": "Henrik",
-            "x-control-group-header": "g1, g2",
+            "x-control-group-header": "annan-grupp, admin-grupp",
         },
     )
-    user = response.json()
-    assert (user["username"], user["name"]) == ("HEPI02", "Henrik")
-    assert sorted(user["groups"]) == ["g1", "g2"]
+    assert response.json() == {"username": "HEPI02", "name": "Henrik", "roles": ["admin"]}
+
+
+def test_okand_grupp_ger_ingen_roll(client: TestClient) -> None:
+    headers = {"x-control-header": "HEPI02", "x-control-group-header": "annan-grupp"}
+    assert client.get("/api/me", headers=headers).json()["roles"] == []
 
 
 def test_mock_ger_fast_anvandare(client: TestClient, monkeypatch) -> None:

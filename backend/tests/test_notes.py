@@ -6,6 +6,19 @@ import pytest
 from fastapi.testclient import TestClient
 
 USER = {"x-control-header": "TEST01"}
+ADMIN = {"x-control-header": "ADMIN01", "x-control-group-header": "admin-grupp"}
+
+
+def test_bara_admin_far_ta_bort(client: TestClient) -> None:
+    note_id = client.post("/api/notes", json={"text": "Hej"}, headers=USER).json()["id"]
+
+    assert client.delete(f"/api/notes/{note_id}", headers=USER).status_code == 403
+    assert client.delete(f"/api/notes/{note_id}", headers=ADMIN).status_code == 204
+    assert client.get(f"/api/notes/{note_id}", headers=USER).status_code == 404
+
+
+def test_borttagning_av_okand_anteckning_ger_404(client: TestClient) -> None:
+    assert client.delete(f"/api/notes/{uuid.uuid4()}", headers=ADMIN).status_code == 404
 
 
 def test_skapad_anteckning_loggas_med_id_men_utan_text(

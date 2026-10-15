@@ -4,12 +4,12 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from auth import get_current_user
+from auth import get_current_user, require_role
 from dependencies import CurrentUserDep, SessionDep
 from schemas import NoteCreate, NotePublic
 from services import notes as service
 
-# Varje endpoint kräver inloggning.
+# Varje endpoint kräver inloggning; den som tar bort kräver dessutom en roll.
 router = APIRouter(prefix="/notes", tags=["notes"], dependencies=[Depends(get_current_user)])
 
 
@@ -26,3 +26,8 @@ def get_note(note_id: uuid.UUID, session: SessionDep) -> NotePublic:
 @router.post("", status_code=201)
 def create_note(data: NoteCreate, session: SessionDep, user: CurrentUserDep) -> NotePublic:
     return service.create_note(session, user, data)
+
+
+@router.delete("/{note_id}", status_code=204, dependencies=[Depends(require_role("admin"))])
+def delete_note(note_id: uuid.UUID, session: SessionDep) -> None:
+    service.delete_note(session, note_id)

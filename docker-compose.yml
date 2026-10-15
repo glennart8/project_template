@@ -34,8 +34,10 @@ services:
     environment:
       # Inuti Docker heter databasen `db`, inte localhost.
       DATABASE_URL: postgresql+psycopg://app:app@db:5432/app
-      # Ingen Application Proxy lokalt: en fast testanvändare.
+      # Ingen Application Proxy lokalt: en fast testanvändare, med rollen admin.
       AUTH_MODE: mock
+      MOCK_GROUPS: '["dev-admin"]'
+      ADMIN_GROUP: dev-admin
     depends_on:
       db:
         condition: service_healthy

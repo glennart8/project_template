@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     MOCK_USER: str = "DEVUSER"
     MOCK_GROUPS: list[str] = []
 
+    # Entra-gruppens ObjectId per roll — olika i test och drift, därför här och
+    # inte i koden. En ny roll är en rad här och en rad i auth.py.
+    ADMIN_GROUP: str = ""
+
     @model_validator(mode="after")
     def _no_mock_in_production(self) -> Self:
         if self.ENVIRONMENT == "production" and self.AUTH_MODE != "app_proxy":

@@ -41,10 +41,12 @@ Du är inloggad som en testanvändare.
 1. **Skapa repot** från mallen, i organisationens GitHub-konto. Byt `APP_NAME`,
    titeln i `frontend/index.html` och den här README:n.
 2. **Starta lokalt** (se nedan) och kontrollera att testerna är gröna.
-3. **Bygg ditt första område** efter exemplet *notes*: `routers/notes.py`,
-   `services/notes.py`, `repositories/notes.py`, `Note` i `models.py`, schemana i
-   `schemas.py` och `tests/test_notes.py`. Ta sedan bort exemplet: de filerna och
-   klasserna, raden i `api.py` och migrationen i `migrations/versions/`.
+3. **Bygg ditt första område** efter exemplet *notes*. I backend:
+   `routers/notes.py`, `services/notes.py`, `repositories/notes.py`, `Note` i
+   `models.py`, schemana i `schemas.py` och `tests/test_notes.py`. I frontend:
+   typerna och anropen i `src/api.ts` och sidan i `src/App.tsx`. Ta sedan bort
+   exemplet: de filerna och klasserna, raden i `api.py` och migrationen i
+   `migrations/versions/`.
 4. **Kör testerna och pusha.**
 5. **Driftsätt** enligt [docs/drift.md](docs/drift.md).
 
