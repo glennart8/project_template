@@ -157,7 +157,7 @@ def is_database_up(session: Session) -> bool:
     return True
 ```
 
-`backend/core/routers/system.py`:
+`backend/routers/system.py`:
 
 ```python
 @router.get("/health")

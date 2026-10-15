@@ -4,10 +4,10 @@ import uuid
 
 from fastapi import APIRouter, Depends
 
-from core.auth import get_current_user
-from core.dependencies import CurrentUserDep, SessionDep
-from modules.notes import service
-from modules.notes.schemas import NoteCreate, NotePublic
+from auth import get_current_user
+from dependencies import CurrentUserDep, SessionDep
+from schemas import NoteCreate, NotePublic
+from services import notes as service
 
 # Varje endpoint kräver inloggning.
 router = APIRouter(prefix="/notes", tags=["notes"], dependencies=[Depends(get_current_user)])

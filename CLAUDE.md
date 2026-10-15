@@ -24,12 +24,22 @@ PostgreSQL 17. React + Vite + TypeScript. Caddy framför allt i drift.
 
 ```
 backend/
-  api.py, config.py, database.py, clock.py
-  core/       det alla moduler delar: inloggning, felhantering, systemroutrar
-  modules/    en katalog per område: router.py, service.py, repository.py,
-              models.py, schemas.py — filerna skapas när de behövs
-  migrations/ Alembic
+  api.py            app och routrar
+  config.py         inställningar
+  database.py       session
+  auth.py           inloggning
+  errors.py         fel → HTTP
+  dependencies.py   SessionDep, CurrentUserDep
+  clock.py          tid
+  models.py         alla tabeller
+  schemas.py        allt API:et tar emot och lämnar ut
+  routers/          en fil per område, t.ex. notes.py
+  services/         en fil per område
+  repositories/     en fil per område
+  migrations/       Alembic
 ```
+
+`models.py` och `schemas.py` delas upp först när de blir svåra att överblicka.
 
 * **Anropen går bara nedåt:** `router` → `service` → `repository` → `models`.
   * `router` tar emot anropet och lämnar över. Ingen regel, ingen SQL.
@@ -38,14 +48,16 @@ backend/
   * `repository` gör frågorna. Inga regler, aldrig commit (låst med test).
 * **Fel:** servicen kastar `LookupError` (404), `PermissionError` (403) eller
   `ValueError` (422) med ett meddelande som kan visas för användaren.
-  `core/exceptions.py` översätter. Ingen try/except i routrarna.
+  `errors.py` översätter. Ingen try/except i routrarna.
 * **Svar** byggs med scheman ur `schemas.py`, aldrig tabellklassen direkt.
-* En modul beror bara på `core`, aldrig på en annan modul.
+* Strukturen är platt med flit. Rymmer systemet flera processer som delar
+  data — som HR-systemet — kan det byggas som en kärna med moduler ovanpå. Det
+  är ett medvetet beslut när det andra fallet finns, inte ett utgångsläge.
 
 # Databas
 
-* **Alembic äger schemat.** Aldrig `create_all`. Ny tabell: modell → importera i
-  `migrations/env.py` → `alembic revision --autogenerate -m "lade_till_x"`.
+* **Alembic äger schemat.** Aldrig `create_all`. Ny tabell: modellen i `models.py`
+  → `alembic revision --autogenerate -m "lade_till_x"` → läs igenom migrationen.
 * En migration som körts någon annanstans än lokalt skrivs aldrig om — rättelsen är
   en ny migration. Migrationer ska vara bakåtkompatibla.
 * Engelska namn, `snake_case`, singular tabellnamn, inga prefix. UUID som nyckel.
@@ -69,7 +81,7 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 
 # Inloggning
 
-* Identiteten kommer från Entra Application Proxy som headers, se `core/auth.py`.
+* Identiteten kommer från Entra Application Proxy som headers, se `auth.py`.
 * Användaren hämtas alltid med `CurrentUserDep`, **aldrig ur en parameter**.
 * Vad användaren får göra avgör appen utifrån gruppernas ObjectId.
 * Den som inte får se något får 404, inte 403 — 403 avslöjar att det finns.
