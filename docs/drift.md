@@ -50,6 +50,9 @@ Backend kör nya migrationer själv vid start.
       `x-control-displayname-header` och `x-control-group-header`.
 - [ ] Användare och grupper är tilldelade appen i Entra («Assignment required»).
 - [ ] Backup av databasen (`pg_dump`) och av uppladdade filer, till en annan maskin.
+      **Med Postgres sköter projektet backupen själv** — drift säkerhetskopierar
+      inte en container på appservern. Med MS SQL sköter drift den, se
+      [mssql.md](mssql.md).
 - [ ] **En återläsning har provats.** En backup som aldrig lästs tillbaka är ingen backup.
 - [ ] Någon har ansvar för att uppdatera servern och bygga om images.
 

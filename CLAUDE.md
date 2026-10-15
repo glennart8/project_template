@@ -14,7 +14,8 @@ Projektet följer teamets Golden Path. Avviker du från den, skriv i README varf
 # Stack
 
 Python 3.12, FastAPI, SQLModel, Alembic, pydantic-settings, uv, pytest, ruff.
-PostgreSQL 17. React + Vite + TypeScript. Caddy framför allt i drift.
+PostgreSQL 17 — större projekt kan använda MS SQL, se `docs/mssql.md`.
+React + Vite + TypeScript. Caddy framför allt i drift.
 
 * **Synkron kod.** Inte `async def` för databasanrop.
 * Beroenden läggs till med `uv add`, aldrig genom att redigera `pyproject.toml`.
