@@ -27,10 +27,9 @@ React + Vite + TypeScript. Caddy framför allt i drift.
 backend/
   api.py            app och routrar
   config.py         inställningar
-  database.py       session
-  auth.py           inloggning
+  database.py       session (SessionDep)
+  auth.py           inloggning och roller (CurrentUserDep, require_role)
   errors.py         fel → HTTP
-  dependencies.py   SessionDep, CurrentUserDep
   clock.py          tid
   models.py         alla tabeller
   schemas.py        allt API:et tar emot och lämnar ut

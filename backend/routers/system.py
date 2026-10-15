@@ -2,8 +2,7 @@
 
 from fastapi import APIRouter
 
-from auth import CurrentUser
-from dependencies import CurrentUserDep
+from auth import CurrentUser, CurrentUserDep
 
 router = APIRouter(tags=["system"])
 

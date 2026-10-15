@@ -162,8 +162,8 @@ def is_database_up(session: Session) -> bool:
 ```python
 from fastapi import APIRouter, Response
 
-from database import is_database_up
-from dependencies import CurrentUserDep, SessionDep
+from auth import CurrentUser, CurrentUserDep
+from database import SessionDep, is_database_up
 
 
 @router.get("/health")
