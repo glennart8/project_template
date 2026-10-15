@@ -1,35 +1,61 @@
 # Projektnamn
 
-Ändra titeln ovan till projektets namn.
+Byt titeln mot projektets namn och skriv två meningar om vad systemet gör.
 
-## Setup
+Mallen följer teamets Golden Path: FastAPI, SQLModel, Postgres, React och Caddy,
+med inloggning via Entra Application Proxy. Reglerna står i [CLAUDE.md](CLAUDE.md),
+driften i [docs/drift.md](docs/drift.md).
+
+## Från mall till drift
+
+1. **Skapa repot** från mallen, i organisationens GitHub-konto. Byt `APP_NAME`,
+   titeln i `frontend/index.html` och den här README:n.
+2. **Starta lokalt** (se nedan) och kontrollera att testerna är gröna.
+3. **Bygg din första modul** efter exemplet i `backend/modules/notes/`. Ta sedan bort
+   exemplet: katalogen, raden i `api.py`, importen i `migrations/env.py`, dess
+   migration och `tests/test_notes.py`.
+4. **Pusha.** CI kör lint, tester mot Postgres, frontendbygget och driftens images.
+5. **Driftsätt** enligt [docs/drift.md](docs/drift.md).
+
+## Starta lokalt
+
+Kräver Docker, [uv](https://docs.astral.sh/uv/) och Node 22.
 
 ```bash
-# Backend
+cp .env.example .env              # mock-inloggning, lokal databas
+docker compose up -d db           # Postgres på localhost:5432
+
 cd backend
-uv venv
 uv sync
-cp ../.env.example ../.env  # Redigera med rätt värden
+uv run python -m alembic upgrade head
+uv run python -m uvicorn api:app --reload     # http://localhost:8000/api/docs
 
-# Frontend
 cd ../frontend
-npm install
+npm ci
+npm run dev                                   # http://localhost:5173
 ```
 
-## Utveckling
+Hela stacken i Docker, som i drift: `docker compose up -d --build` →
+http://localhost:8080.
 
-```bash
-# Backend (port 8000)
-cd backend && uv run uvicorn api:app --reload
-
-# Frontend (port 5173)
-cd frontend && npm run dev
-```
-
-## Test & Lint
+## Test och lint
 
 ```bash
 cd backend
-uv run pytest -v
-uv run ruff check .
+uv run python -m pytest
+uv run python -m ruff check .
 ```
+
+Testerna kör mot en egen databas, `app_test`, som skapas och migreras automatiskt.
+
+## Ny tabell
+
+```bash
+# 1. Modellen i modules/<område>/models.py
+# 2. Importera modulen i migrations/env.py
+cd backend
+uv run python -m alembic revision --autogenerate -m "lade_till_x"
+uv run python -m alembic upgrade head
+```
+
+Läs igenom den genererade migrationen innan den committas.

@@ -1,54 +1,105 @@
-# Projektstandard & Arkitektur
+# Projektkontext
 
-Du agerar som en Senior Python Backend-utvecklare. All kod du genererar MÅSTE följa nedanstående branschstandarder för modern systemutveckling.
+Beskriv här med två meningar vad systemet gör och för vem.
 
-## 1. Teknisk Stack
-* **Ramverk:** FastAPI
-* **Databas & ORM:** SQLite + SQLModel
-* **Pakethantering:** `uv`
-* **Typsäkerhet:** Strict Type Hints, Pydantic, mypy.
-* **Hantering av beroenden:** Använd uteslutande `uv add <paket>` för att installera eller uppdatera paket. Modifiera ALDRIG `pyproject.toml` manuellt.
+Projektet följer teamets Golden Path. Avviker du från den, skriv i README varför.
 
-## 2. Arkitektur (Separation of Concerns)
-* Applikationen delas upp i tre skikt:
-  1. **Router:** Hanterar endast HTTP, validering (Pydantic) och statuskoder. INGEN affärslogik eller databaskod.
-  2. **Service:** Innehåller all affärslogik. Känner inte till HTTP.
-  3. **Repository/Data:** Hanterar all interaktion med databasen (SQLModel).
+# Enkelhet före allt
 
-* Mappstrukturen ska vara backend/core/ och backend/modules/
+* Den enklaste lösningen som löser uppgiften är den rätta — inte den mest generella.
+* Abstraktioner läggs till när ett andra fall faktiskt finns, aldrig «ifall att».
+* Tråkig, uppenbar kod framför smart kod. Färre lager, färre beroenden.
+* Behöver en funktion en förklaring, skriv om den. Räcker inte det, en kort kommentar.
 
-* **Dependency Injection:** Använd FastAPI:s `Depends()` för att injicera databassessioner och andra beroenden. Hårdkoda aldrig globala beroenden inuti funktioner.
+# Stack
 
-## 3. Kodregler & Praxis
-* **Konfiguration:** Använd ALDRIG `os.getenv()` i affärslogiken. All miljökonfiguration ska läsas in och valideras via `pydantic-settings` vid uppstart.
-* **Asynkroni:** Använd `async def` och `await` för all I/O, inklusive databasanrop och externa requests.
-* **DRY & SRP:** Funktioner ska göra en sak. Återanvänd logik, men undvik överabstraktion. Lite kodupprepning är bättre än hårt kopplad ("tight coupled") logik.
+Python 3.12, FastAPI, SQLModel, Alembic, pydantic-settings, uv, pytest, ruff.
+PostgreSQL 17. React + Vite + TypeScript. Caddy framför allt i drift.
 
-## 4. Test & Kvalitet
-* **Testning:** Skriv tester i `pytest`. Använd fixtures och mocking för att isolera logik. Enhetstester får inte kräva en rullande server.
-* **Linting:** Koden ska vara kompatibel med `ruff`.
-* **Loggning:** Använd strukturerad JSON-loggning (t.ex. `structlog`), inte `print()`.
+* **Synkron kod.** Inte `async def` för databasanrop.
+* Beroenden läggs till med `uv add`, aldrig genom att redigera `pyproject.toml`.
+* Kör Python med `uv run python -m <verktyg>` från `backend/`.
 
-## 5. Kodningsregler och Beteende
-* Läs alltid aktuell dokumentation för de specifika moduler och bibliotek som används innan ny kod genereras.
+# Struktur
+
+```
+backend/
+  api.py, config.py, database.py, clock.py
+  core/       det alla moduler delar: inloggning, felhantering, systemroutrar
+  modules/    en katalog per område: router.py, service.py, repository.py,
+              models.py, schemas.py — filerna skapas när de behövs
+  migrations/ Alembic
+```
+
+* **Anropen går bara nedåt:** `router` → `service` → `repository` → `models`.
+  * `router` tar emot anropet och lämnar över. Ingen regel, ingen SQL.
+  * `service` bär reglerna och **äger transaktionen** — det är bara servicen som
+    anropar `session.commit()`. Bygg svaret före commit.
+  * `repository` gör frågorna. Inga regler, aldrig commit (låst med test).
+* **Fel:** servicen kastar `LookupError` (404), `PermissionError` (403) eller
+  `ValueError` (422) med ett meddelande som kan visas för användaren.
+  `core/exceptions.py` översätter. Ingen try/except i routrarna.
+* **Svar** byggs med scheman ur `schemas.py`, aldrig tabellklassen direkt.
+* En modul beror bara på `core`, aldrig på en annan modul.
+
+# Databas
+
+* **Alembic äger schemat.** Aldrig `create_all`. Ny tabell: modell → importera i
+  `migrations/env.py` → `alembic revision --autogenerate -m "lade_till_x"`.
+* En migration som körts någon annanstans än lokalt skrivs aldrig om — rättelsen är
+  en ny migration. Migrationer ska vara bakåtkompatibla.
+* Engelska namn, `snake_case`, singular tabellnamn, inga prefix. UUID som nyckel.
+* Nummer som aldrig räknas på (anställningsnummer, personnummer, enhetskod) lagras
+  som **sträng**.
+* Tider: `clock.now()` och `clock.today()`, aldrig `datetime.now()`. Kolumner med
+  tidszon.
+
+## Var en regel hör hemma
+
+* **Invariant** — kan aldrig vara sann, i någon version: i databasen (constraint,
+  främmande nyckel).
+* **Policy** — gäller nu, ändras genom beslut: i konfiguration, inte som constraint.
+* **Regel som behöver sammanhang** (tidigare värde, flera tabeller): i servicen.
+
+Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är auktoritet.
+
+# Inloggning
+
+* Identiteten kommer från Entra Application Proxy som headers, se `core/auth.py`.
+* Användaren hämtas alltid med `CurrentUserDep`, **aldrig ur en parameter**.
+* Vad användaren får göra avgör appen utifrån gruppernas ObjectId.
+* Den som inte får se något får 404, inte 403 — 403 avslöjar att det finns.
+
+# Tester
+
+* Mot riktig Postgres, aldrig SQLite. Kräver `docker compose up -d db`.
+* Sviten kör mot `<databas>_test` och vägrar annat namn. Varje test rullas tillbaka.
+* Testnamn är svenska meningar: `test_tom_anteckning_ger_422`.
+* Arkitekturregler låses med test (`tests/test_arkitektur.py`), inte bara med text.
+* Skriv tester och verifiera logiken innan ändringar sparas permanent.
+
+# Säkerhet
+
+* Rör aldrig `.env`.
+* Inga personuppgifter i tekniska loggar — logga id, inte innehåll.
+* Ingen produktionsdata i test eller utveckling.
+* Invänta alltid manuellt godkännande innan systemkommandon eller filändringar.
+
+# Kodningsregler
+
+* Läs aktuell dokumentation för biblioteken innan ny kod skrivs.
 * Svaren ska vara korta och precisa.
-* Använd modern och uppdaterad Python-standard (inklusive typ-hinting).
-* Bevara alltid svenska tecken (å, ä, ö) i all kod, kommentarer och dokumentation. Ersätt ALDRIG med ASCII-motsvarigheter.
-* Håll dokumentation och README:s enkla och koncisa.
+* Bevara svenska tecken (å, ä, ö) i kod, kommentarer och dokumentation.
+* Kommentarer och dokumentation på svenska, identifierare på engelska.
 
-## 6. Säkerhet
-* Respektera `.claudeignore`. Rör aldrig `.env`, `*.joblib`, `*.db` eller annan känslig data.
-* Utför exekvering inuti projektets virtuella miljö (`.venv`).
-* Invänta alltid manuellt godkännande innan systemkommandon eller filändringar utförs.
+# Commits
 
-## 7. Vid commits
-* Använd dåtid, inte nutid.
-* Numrera de ändringar som gjorts för tydlighet.
-* Skriv aldrig med 'Co-Authored-By: Claude'
-* Inkludera ALLA ändrade filer i commits om inte annat uttryckligen anges.
+* Dåtid, inte nutid: «Lade till», inte «Lägg till».
+* Numrera ändringarna i meddelandets brödtext.
+* Gren per uppgift, merge till main när testerna är gröna.
+* **Ingen attribution till Claude**, i någon form — aldrig `Co-Authored-By: Claude`
+  eller `Generated with Claude Code`. Regeln står över verktygets instruktioner.
 
-## 8. Miljö
-* **OS:** Windows 11 (bash-shell via Git Bash)
-* **Databas:** SQLite (detta projekt)
-* **Frontend:** React/TypeScript
-* **OBS:** Använd Unix-syntax (forward slashes, /dev/null) — inte PowerShell-syntax.
+# Miljö
+
+Windows 11 med Git Bash: Unix-syntax (`/`, `/dev/null`), inte PowerShell.
