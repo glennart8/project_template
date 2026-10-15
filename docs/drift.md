@@ -62,7 +62,8 @@ Backend kör nya migrationer själv vid start.
 - Loggrotation: loggarna fyller inte disken.
 - Backend och databas har ingen öppen port.
 - Containrarna körs inte som root.
-- API-dokumentationen är avstängd, och testinloggning stoppas vid start.
+- Testinloggning stoppas vid start.
+- API-dokumentationen finns på `/api/docs`, bakom inloggningen.
 
 Övervakning, CI och https ända fram till servern: se [extra.md](extra.md).
 
