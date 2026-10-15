@@ -2,9 +2,20 @@
 
 import uuid
 
+import pytest
 from fastapi.testclient import TestClient
 
 USER = {"x-control-header": "TEST01"}
+
+
+def test_skapad_anteckning_loggas_med_id_men_utan_text(
+    client: TestClient, caplog: pytest.LogCaptureFixture
+) -> None:
+    # Fångar två fel: att INFO inte syns alls, och att innehåll hamnar i loggen.
+    note = client.post("/api/notes", json={"text": "Hemlig text"}, headers=USER).json()
+    logged = " ".join(record.getMessage() for record in caplog.records)
+    assert note["id"] in logged
+    assert "Hemlig text" not in logged
 
 
 def test_anteckning_skapas_och_kan_hamtas(client: TestClient) -> None:

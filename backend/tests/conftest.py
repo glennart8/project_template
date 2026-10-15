@@ -48,6 +48,7 @@ def engine() -> Generator[Engine]:
     config = Config(str(BACKEND / "alembic.ini"))
     config.set_main_option("script_location", str(BACKEND / "migrations"))
     config.set_main_option("sqlalchemy.url", TEST_URL.render_as_string(hide_password=False))
+    config.attributes["configure_logger"] = False  # rör inte appens loggning
     command.upgrade(config, "head")
 
     engine = create_engine(TEST_URL)
