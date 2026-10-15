@@ -7,6 +7,10 @@ med inloggning via Entra Application Proxy. Reglerna står i [CLAUDE.md](CLAUDE.
 driften i [docs/drift.md](docs/drift.md). Det som går att lägga till när behovet
 finns står i [docs/extra.md](docs/extra.md).
 
+**Databas:** Postgres passar de flesta projekt, men då sköter projektet själv
+backupen. Större projekt kan använda kommunens MS SQL, där drift sköter backupen —
+byt i så fall motor när projektet skapas, enligt [docs/mssql.md](docs/mssql.md).
+
 ## Prova direkt
 
 Kräver bara Docker.
