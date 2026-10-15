@@ -1,0 +1,31 @@
+"""Exempelmodulens tester — mönstret för en moduls tester."""
+
+import uuid
+
+from fastapi.testclient import TestClient
+
+USER = {"x-control-header": "TEST01"}
+
+
+def test_anteckning_skapas_och_kan_hamtas(client: TestClient) -> None:
+    created = client.post("/api/notes", json={"text": "  Hej  "}, headers=USER)
+    assert created.status_code == 201
+    assert created.json()["text"] == "Hej"
+    assert created.json()["created_by"] == "TEST01"
+
+    fetched = client.get(f"/api/notes/{created.json()['id']}", headers=USER)
+    assert fetched.json() == created.json()
+
+
+def test_tom_anteckning_ger_422(client: TestClient) -> None:
+    response = client.post("/api/notes", json={"text": "   "}, headers=USER)
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Anteckningen får inte vara tom."}
+
+
+def test_okand_anteckning_ger_404(client: TestClient) -> None:
+    assert client.get(f"/api/notes/{uuid.uuid4()}", headers=USER).status_code == 404
+
+
+def test_utan_inloggning_ger_401(client: TestClient) -> None:
+    assert client.get("/api/notes").status_code == 401
