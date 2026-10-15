@@ -12,16 +12,9 @@ from schemas import NoteCreate, NotePublic
 
 logger = logging.getLogger(__name__)
 
-
-def _to_public(note: Note) -> NotePublic:
-    """Tabellraden → det API:et lämnar ut. Fälten skrivs ut, så att en ny kolumn
-    inte hamnar i API:et av misstag."""
-    return NotePublic(
-        id=note.id,
-        text=note.text,
-        created_by=note.created_by,
-        created_at=note.created_at,
-    )
+# Svaren byggs med NotePublic.model_validate(note): fälten heter likadant i
+# tabell och schema, och schemat bestämmer vad som går ut. Hämtar ett svar data
+# från flera tabeller, skriv konstruktorn för hand, som i HR-systemets services.
 
 
 def create_note(session: Session, user: CurrentUser, data: NoteCreate) -> NotePublic:
@@ -31,7 +24,7 @@ def create_note(session: Session, user: CurrentUser, data: NoteCreate) -> NotePu
 
     note = repository.add(session, Note(text=text, created_by=user.username))
     # Före commit: efter commit glömmer SQLAlchemy objektets värden.
-    response = _to_public(note)
+    response = NotePublic.model_validate(note)
     session.commit()  # servicen äger transaktionen
     # Id, aldrig innehållet: texten kan innehålla personuppgifter.
     logger.info("Anteckning %s skapad", response.id)
@@ -42,11 +35,11 @@ def get_note(session: Session, note_id: uuid.UUID) -> NotePublic:
     note = repository.get(session, note_id)
     if note is None:
         raise LookupError("Anteckningen finns inte.")
-    return _to_public(note)
+    return NotePublic.model_validate(note)
 
 
 def list_notes(session: Session) -> list[NotePublic]:
-    return [_to_public(note) for note in repository.list_all(session)]
+    return [NotePublic.model_validate(note) for note in repository.list_all(session)]
 
 
 def delete_note(session: Session, user: CurrentUser, note_id: uuid.UUID) -> None:
