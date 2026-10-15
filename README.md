@@ -7,6 +7,21 @@ med inloggning via Entra Application Proxy. Reglerna står i [CLAUDE.md](CLAUDE.
 driften i [docs/drift.md](docs/drift.md). Det som går att lägga till när behovet
 finns står i [docs/extra.md](docs/extra.md).
 
+## Stack
+
+| Del | Verktyg | Används till |
+|---|---|---|
+| Backend | Python 3.12, FastAPI | API:et: endpoints, validering av anrop, API-dokumentation |
+| Databaskod | SQLModel | Tabeller och API-scheman som Python-klasser |
+| Schemaändringar | Alembic | Migrationer, en fil per ändring av databasen |
+| Inställningar | pydantic-settings | Läser och kontrollerar `.env` och miljövariabler |
+| Databas | PostgreSQL 17 | Standard. MS SQL i större projekt, se nedan. |
+| Paket | uv, npm | Beroenden med låsfiler |
+| Test och lint | pytest, ruff | Tester mot riktig databas, kodstil och vanliga fel |
+| Frontend | React, TypeScript, Vite | Gränssnittet |
+| Inloggning | Entra Application Proxy | Identiteten kommer som headers |
+| Drift | Docker Compose, Caddy | Containrarna, och den enda vägen in |
+
 **Databas:** Postgres passar de flesta projekt, men då sköter projektet själv
 backupen. Större projekt kan använda kommunens MS SQL, där drift sköter backupen —
 byt i så fall motor när projektet skapas, enligt [docs/mssql.md](docs/mssql.md).
