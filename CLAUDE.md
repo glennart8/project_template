@@ -106,6 +106,8 @@ Dubblerar Python ett constraint för ett läsbart fel, skriv vilket som är aukt
 * Inga personuppgifter i tekniska loggar — logga id, inte innehåll. Logga med
   `logger = logging.getLogger(__name__)` och parametrar, inte f-strängar:
   `logger.info("Anteckning %s skapad", note_id)`.
+* Uvicorns åtkomstlogg är avstängd i `Dockerfile`, eftersom adressen kan bära
+  personuppgifter (`?q=<namn>`). Slå inte på den utan att lösa det.
 * Ingen produktionsdata i test eller utveckling.
 * Invänta alltid manuellt godkännande innan systemkommandon eller filändringar.
 

@@ -19,4 +19,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
 # Migrationerna körs vid varje start; Alembic hoppar över dem som redan körts.
-CMD ["sh", "-c", "alembic upgrade head && uvicorn api:app --host 0.0.0.0 --port 8000"]
+# Ingen åtkomstlogg: adressen kan innehålla personuppgifter, t.ex. ett sökt namn i
+# ?q=. Fel och appens egna loggrader syns ändå.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn api:app --host 0.0.0.0 --port 8000 --no-access-log"]
