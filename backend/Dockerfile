@@ -1,15 +1,27 @@
 FROM python:3.12-slim
 
+# Låst version, så att bygget blir likadant varje gång.
+COPY --from=ghcr.io/astral-sh/uv:0.10.2 /uv /usr/local/bin/uv
+
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-
-COPY pyproject.toml uv.lock* ./
-RUN uv sync --frozen --no-dev
+# Beroendena först: lagret återanvänds så länge låsfilen är oförändrad.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev
 
 COPY . .
 
+# Containern körs inte som root.
+RUN useradd --create-home app
+USER app
+
+ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
+
 # Migrationerna körs vid varje start; Alembic hoppar över dem som redan körts.
-CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn api:app --host 0.0.0.0 --port 8000"]
+# --proxy-headers: användarens IP-adress i stället för proxyns. Att lita på
+# alla avsändare (*) går bara för att backend aldrig publiceras utanför Docker.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn api:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'"]

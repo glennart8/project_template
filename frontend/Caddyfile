@@ -1,0 +1,20 @@
+# Enda vägen in till systemet.
+#
+# SITE_ADDRESS är :80 som standard — vanlig http, rätt bakom Entra Application
+# Proxy. Med ett värdnamn (t.ex. minapp.udn.ds) sköter Caddy https själv;
+# lägg då till `tls internal` eller kommunens certifikat.
+{$SITE_ADDRESS::80} {
+	encode
+
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# Allt annat är frontend. Okända sökvägar ger index.html, så att
+	# React kan sköta sina egna adresser.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

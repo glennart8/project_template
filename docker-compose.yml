@@ -1,3 +1,8 @@
+# Utveckling. För drift, se docker-compose.prod.yml.
+#
+#   docker compose up -d db        bara databasen; backend och frontend körs lokalt
+#   docker compose up -d --build   hela stacken på http://localhost:8080
+
 services:
   db:
     image: postgres:17
@@ -21,10 +26,9 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       # Inuti Docker heter databasen `db`, inte localhost.
       DATABASE_URL: postgresql+psycopg://app:app@db:5432/app
@@ -35,7 +39,8 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "127.0.0.1:8080:80"
+      - "[::1]:8080:80"
     depends_on:
       - backend
 

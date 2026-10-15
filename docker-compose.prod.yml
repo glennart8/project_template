@@ -1,0 +1,61 @@
+# Drift. Körs på servern:
+#
+#   git pull && docker compose -f docker-compose.prod.yml up -d --build
+#
+# Kräver en .env bredvid filen med minst POSTGRES_PASSWORD (bara bokstäver och
+# siffror — det hamnar i en URL). Den filen finns bara på servern, aldrig i git.
+#
+# Bara frontend (Caddy) har en öppen port. ⚠ Den ska bara nås av Entra
+# Application Proxys connector — annars kan vem som helst skriva
+# inloggningsheadern själv. Det stängs i serverns brandvägg.
+
+x-logging: &logging
+  # Utan gräns växer loggfilerna tills disken är full.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  db:
+    image: postgres:17
+    restart: always
+    logging: *logging
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Sätt POSTGRES_PASSWORD i .env}
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    restart: always
+    logging: *logging
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      ENVIRONMENT: production
+      AUTH_MODE: app_proxy
+      DATABASE_URL: postgresql+psycopg://app:${POSTGRES_PASSWORD}@db:5432/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    restart: always
+    logging: *logging
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
