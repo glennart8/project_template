@@ -6,4 +6,4 @@ select = ["E", "F", "I", "W"]
 ignore = ["E501"]
 
 [lint.isort]
-known-first-party = ["config", "core", "database", "logging_config", "modules", "api", "seed"]
+known-first-party = ["config", "core", "database", "modules", "api", "seed"]

@@ -1,26 +1,20 @@
-"""FastAPI-applikation med router-registrering och CORS."""
+"""FastAPI-applikation och router-registrering."""
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from config import APP_VERSION, settings
 from core.exceptions import register_exception_handlers
 from core.routers.system import router as system_router
 from database import create_db_and_tables
-from logging_config import setup_logging
-from modules.registry import register_modules
 
 
-# lifespan är en async context manager som FastAPI kör som ett skal runt hela serverns livstid:
-# startup-logik före yield, server kör under yield, shutdown-logik efter yield.
+# Startup-logik före yield, shutdown-logik efter.
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Startup/shutdown-händelser."""
-    setup_logging()
-    await create_db_and_tables()
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+    create_db_and_tables()
     yield
 
 
@@ -30,16 +24,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS-middleware för att tillåta frontend-appar att anropa API:et.
-# I produktion bör CORS_ORIGINS begränsas till de faktiska domänerna där frontend-apparna hostas.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 register_exception_handlers(app)
-app.include_router(system_router)
-register_modules(app)
+# Allt under /api, så att proxyn (nginx i drift, Vite i utveckling) kan skicka
+# /api till backend och resten till frontend.
+app.include_router(system_router, prefix="/api")

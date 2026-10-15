@@ -1,19 +1,20 @@
 """Smoke-test som verifierar att grundläggande infrastruktur fungerar."""
 
-from sqlmodel.ext.asyncio.session import AsyncSession
+from fastapi.testclient import TestClient
+from sqlmodel import Session
 
 from api import app
 
 
-async def test_session_fixture_ger_async_session(session: AsyncSession) -> None:
-    assert isinstance(session, AsyncSession)
+def test_session_fixture_ger_session(session: Session) -> None:
+    assert isinstance(session, Session)
 
 
-def test_app_kan_importeras() -> None:
-    assert app.title
+def test_health_svarar_under_api() -> None:
+    with TestClient(app) as client:
+        assert client.get("/api/health").json() == {"status": "ok"}
 
 
-def test_systemroutrar_ar_registrerade() -> None:
-    paths = {route.path for route in app.routes}
-    assert "/health" in paths
-    assert "/version" in paths
+def test_version_svarar_under_api() -> None:
+    with TestClient(app) as client:
+        assert client.get("/api/version").status_code == 200
