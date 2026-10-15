@@ -29,7 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v10
+      # Exakt version: setup-uv publicerar ingen flyttbar v10-tagg.
+      - uses: astral-sh/setup-uv@v10.3.0
 
       - name: Installera beroenden
         working-directory: backend
