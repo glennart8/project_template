@@ -1,12 +1,15 @@
-"""Testdata / initial seed för utveckling."""
+"""Testdata för utveckling. Kör efter `alembic upgrade head`."""
 
-from database import create_db_and_tables
+from sqlmodel import Session
+
+from database import engine
 
 
 def seed() -> None:
-    """Skapa tabeller och lägg in testdata."""
-    create_db_and_tables()
-    # Lägg till seed-data här
+    """Lägg in testdata."""
+    with Session(engine) as session:
+        # session.add(...)
+        session.commit()
 
 
 if __name__ == "__main__":

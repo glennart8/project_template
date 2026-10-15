@@ -1,17 +1,12 @@
-"""Databasmotor och sessionshantering."""
+"""Databasmotor och sessionshantering. Schemat ägs av Alembic, se migrations/."""
 
 from collections.abc import Generator
 
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, create_engine
 
 from config import settings
 
 engine = create_engine(settings.DATABASE_URL, echo=settings.DEBUG)
-
-
-def create_db_and_tables() -> None:
-    """Skapa alla tabeller vid uppstart."""
-    SQLModel.metadata.create_all(engine)
 
 
 def get_session() -> Generator[Session]:
