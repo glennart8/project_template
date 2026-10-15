@@ -1,28 +1,21 @@
 """Gemensamma test-fixtures."""
 
-from collections.abc import AsyncGenerator
+from collections.abc import Generator
 
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+import pytest
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel
-from sqlmodel.ext.asyncio.session import AsyncSession
-
-TEST_DATABASE_URL = "sqlite+aiosqlite://"
+from sqlmodel import Session, SQLModel, create_engine
 
 
-@pytest_asyncio.fixture
-async def session() -> AsyncGenerator[AsyncSession, None]:
+@pytest.fixture
+def session() -> Generator[Session]:
     """In-memory databassession för tester."""
-    engine = create_async_engine(
-        TEST_DATABASE_URL,
-        echo=False,
+    engine = create_engine(
+        "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
-    async with factory() as session:
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
         yield session
-    await engine.dispose()
+    engine.dispose()

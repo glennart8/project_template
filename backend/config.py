@@ -18,8 +18,7 @@ class Settings(BaseSettings):
     )
 
     APP_NAME: str = "MyApp"
-    DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
-    CORS_ORIGINS: list[str] = ["http://localhost:5173"]
+    DATABASE_URL: str = "sqlite:///./app.db"
     DEBUG: bool = False
 
 
